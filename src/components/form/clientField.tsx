@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form";
 import type { OSFormData } from "../../types/formType";
 import { inputStyles } from "./osForm";
+import { InputPhone } from "./inputPhone";
 
 export function ClientField() {
   const {
@@ -29,7 +30,7 @@ export function ClientField() {
           <p className="text-[10px] text-red-700">{errors.name.message}</p>
         )}
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col min-h-22.5">
         <label htmlFor="cnpj" className="text-gray-700 my-2">
           CNPJ / CPF
         </label>
@@ -41,7 +42,8 @@ export function ClientField() {
           className={inputStyles({ status: errors.cnpj ? "erro" : "default" })}
         />
       </div>
-      <div className="flex flex-col">
+      <InputPhone />
+      <div className="flex flex-col min-h-22.5">
         <label htmlFor="phone" className="text-gray-700 my-2">
           Telefone
         </label>
@@ -56,7 +58,7 @@ export function ClientField() {
           <p className="text-[10px] text-red-700">{errors.phone.message}</p>
         )}
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col min-h-22.5">
         <label htmlFor="adress" className="text-gray-700 my-2">
           Endereço
         </label>

@@ -3,18 +3,21 @@ import { ClientField } from "./clientField";
 import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
 
-export const inputStyles = cva("p-1 bg-gray-50 rounded outline-0", {
-  variants: {
-    status: {
-      default:
-        "border border-gray-300 focus:bg-gray-100 focus:ring focus:ring-gray-700",
-      erro: "ring-red-700 focus:ring-red-700 ring-1",
+export const inputStyles = cva(
+  "p-1 bg-gray-50 rounded outline-0 text-gray-700",
+  {
+    variants: {
+      status: {
+        default:
+          "border border-gray-300 focus:bg-gray-100 focus:ring focus:ring-gray-700",
+        erro: "ring-red-700 focus:ring-red-700 ring-1",
+      },
+    },
+    defaultVariants: {
+      status: "default",
     },
   },
-  defaultVariants: {
-    status: "default",
-  },
-});
+);
 
 export default function OSForm() {
   const methods = useForm<OSFormData>();
