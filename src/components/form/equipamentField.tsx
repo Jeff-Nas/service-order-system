@@ -32,12 +32,7 @@ export function EquipamentField() {
       />
 
       {/*------------------Horímetro------------------------------ */}
-      <Field
-        label="Horímetro"
-        name="hourmeter"
-        type="text"
-        isRequired={false}
-      />
+      <Field label="Horímetro" name="hourmeter" type="text" />
 
       {/*-----------------Defeito Relatado-------------------------- */}
       <div className="flex flex-col min-h-22.5">

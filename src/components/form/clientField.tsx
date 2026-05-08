@@ -16,7 +16,7 @@ export function ClientField() {
         isRequired
       />
       {/*--------------CNPJ / CPF---------------------------*/}
-      <Field label="CNPJ / CPF" name="cnpj" type="text" isRequired={false} />
+      <Field label="CNPJ / CPF" name="cnpj" type="text" />
       {/*--------------Telefone do Cliente------------------*/}
       <InputPhone />
       {/*--------------Endereço-----------------------------*/}

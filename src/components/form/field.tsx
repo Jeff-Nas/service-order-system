@@ -6,10 +6,10 @@ interface FieldTypes {
   label: string;
   name: keyof OSFormData;
   type: string;
-  isRequired: boolean;
+  isRequired?: boolean;
 }
 
-export function Field({ label, name, type, isRequired }: FieldTypes) {
+export function Field({ label, name, type, isRequired = false }: FieldTypes) {
   const {
     register,
     formState: { errors },
