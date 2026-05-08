@@ -1,5 +1,6 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { ClientField } from "./clientField";
+import { EquipamentField } from "./equipamentField";
 import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
 
@@ -30,8 +31,10 @@ export default function OSForm() {
     //O primeiro render roda handleSubmit que retorna outra função - pronta para p submit
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <div className="flex flex-col lg:grid lg:grid-cols-2 items-center">
+        {/*testando o justify center */}
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2  justify-center max-w-5xl mx-auto">
           <ClientField />
+          <EquipamentField />
         </div>
         <div className="flex w-full lg:justify-end">
           <button

@@ -1,6 +1,13 @@
 export interface OSFormData {
-  name: string;
+  //cliente
+  clientName: string;
   cnpj: string;
   phone: string;
   adress: string;
+  //fabricante
+  builder: string;
+  model: string;
+  serialNumber: number;
+  hourmeter: string;
+  defect: string;
 }
