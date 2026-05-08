@@ -29,17 +29,18 @@ export default function OSForm() {
   return (
     //O primeiro render roda handleSubmit que retorna outra função - pronta para p submit
     <FormProvider {...methods}>
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className="flex flex-col items-center"
-      >
-        <ClientField />
-        <button
-          type="submit"
-          className="mt-4 bg-blue-500 text-white p-2 rounded"
-        >
-          Gerar OS
-        </button>
+      <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <div className="flex flex-col lg:grid lg:grid-cols-2 items-center">
+          <ClientField />
+        </div>
+        <div className="flex w-full lg:justify-end">
+          <button
+            type="submit"
+            className="mt-4 bg-blue-500 text-white p-2 rounded lg:w-60 lg:font-semibold lg:text-xl"
+          >
+            Gerar OS
+          </button>
+        </div>
       </form>
     </FormProvider>
   );

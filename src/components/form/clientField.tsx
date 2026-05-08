@@ -11,7 +11,9 @@ export function ClientField() {
 
   return (
     <div className="bg-white border-gray-300 rounded-lg border p-5 sm:w-2/3">
-      <h2 className="text-xl font-semibold my-2">Dados do Cliente</h2>
+      <h2 className="text-xl lg:text-2xl font-semibold my-2">
+        Dados do Cliente
+      </h2>
       <hr />
       {/*altura mínima definida para evitar quebra de layout */}
       <div className="flex flex-col min-h-22.5">
