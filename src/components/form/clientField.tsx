@@ -10,7 +10,7 @@ export function ClientField() {
   } = useFormContext<OSFormData>();
 
   return (
-    <div className="bg-white border-gray-300 rounded-lg border max-w-80 p-5">
+    <div className="bg-white border-gray-300 rounded-lg border p-5 sm:w-2/3">
       <h2 className="text-xl font-semibold my-2">Dados do Cliente</h2>
       <hr />
       {/*altura mínima definida para evitar quebra de layout */}
@@ -43,21 +43,7 @@ export function ClientField() {
         />
       </div>
       <InputPhone />
-      <div className="flex flex-col min-h-22.5">
-        <label htmlFor="phone" className="text-gray-700 my-2">
-          Telefone
-        </label>
-        <input
-          type="tel"
-          id="phone"
-          //required não necessãrio no react hook form
-          {...register("phone", { required: "Campo obrigatório" })}
-          className={inputStyles({ status: errors.phone ? "erro" : "default" })}
-        />
-        {errors?.phone && (
-          <p className="text-[10px] text-red-700">{errors.phone.message}</p>
-        )}
-      </div>
+
       <div className="flex flex-col min-h-22.5">
         <label htmlFor="adress" className="text-gray-700 my-2">
           Endereço

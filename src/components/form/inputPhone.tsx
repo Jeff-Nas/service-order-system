@@ -34,6 +34,8 @@ export function InputPhone() {
             {...field}
             id="phone"
             type="tel"
+            //unmask={false} = salvar o valor formatado
+            unmask={false}
             mask={[{ mask: "(00) 0000-0000" }, { mask: "(00) 00000-0000" }]}
             //IMask precisa do onAccept para garantir
             // que o Hook Form receba o valor formatado corretamente
