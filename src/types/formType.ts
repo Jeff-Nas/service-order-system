@@ -1,3 +1,5 @@
+type MaintenanceType = "preventiva" | "corretiva" | "preditiva";
+
 export interface OSFormData {
   //cliente
   clientName: string;
@@ -10,4 +12,9 @@ export interface OSFormData {
   serialNumber: number;
   hourmeter: string;
   defect: string;
+  //serviços executados
+  maintenanceType: MaintenanceType;
+  hours: number;
+  cost: string;
+  serviceDescription: string;
 }
