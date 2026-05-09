@@ -8,18 +8,18 @@ export function ClientField() {
         Dados do Cliente
       </h2>
       <hr className="border-gray-500 " />
-      {/*--------------Nome do Cliente----------------------*/}
+
       <Field
         label="Razão Social / Nome"
         name="clientName"
         type="text"
         isRequired
       />
-      {/*--------------CNPJ / CPF---------------------------*/}
+
       <Field label="CNPJ / CPF" name="cnpj" type="text" />
-      {/*--------------Telefone do Cliente------------------*/}
+
       <InputPhone />
-      {/*--------------Endereço-----------------------------*/}
+
       <Field label="Endereço" name="adress" type="text" isRequired />
     </div>
   );

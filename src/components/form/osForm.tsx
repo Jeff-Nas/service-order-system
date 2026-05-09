@@ -3,6 +3,7 @@ import { ClientField } from "./clientField";
 import { EquipamentField } from "./equipamentField";
 import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
+import { ServicesField } from "./servicesField";
 
 export const inputStyles = cva(
   "p-1 bg-gray-50 rounded outline-0 text-gray-700",
@@ -35,6 +36,7 @@ export default function OSForm() {
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2  justify-center max-w-5xl mx-auto">
           <ClientField />
           <EquipamentField />
+          <ServicesField />
         </div>
         <div className="flex w-full lg:justify-end">
           <button

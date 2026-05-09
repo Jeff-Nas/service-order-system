@@ -17,13 +17,10 @@ export function EquipamentField() {
       </h2>
       <hr className="border-gray-500 " />
 
-      {/*----------------Fabricante------------------------------*/}
       <Field label="Fabricante" name="builder" type="text" isRequired />
 
-      {/*-------------------Modelo-------------------------------- */}
       <Field label="Modelo" name="model" type="text" isRequired />
 
-      {/*------------------Número de Série----------------------- */}
       <Field
         label="Número de Série"
         name="serialNumber"
@@ -31,10 +28,8 @@ export function EquipamentField() {
         isRequired={false}
       />
 
-      {/*------------------Horímetro------------------------------ */}
       <Field label="Horímetro" name="hourmeter" type="text" />
 
-      {/*-----------------Defeito Relatado-------------------------- */}
       <div className="flex flex-col min-h-22.5">
         <label htmlFor="defect" className="text-gray-700 my-2">
           Defeito Relatado
