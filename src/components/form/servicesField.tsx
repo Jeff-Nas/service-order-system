@@ -1,6 +1,7 @@
 import { Field } from "./field";
 import type { OSFormData } from "@/types/formType";
 import { Controller, useFormContext } from "react-hook-form";
+import { TextareaField } from "./textareaField";
 import { inputStyles } from "./osForm";
 import {
   Select,
@@ -52,6 +53,11 @@ export function ServicesField() {
       </div>
       <Field label="Horas" name="hours" type="number" />
       <Field label="Valor/Hora" name="cost" type="text" isRequired />
+      <TextareaField
+        label="Descrição dos Serviços"
+        name="serviceDescription"
+        isRequired
+      />
     </div>
   );
 }
