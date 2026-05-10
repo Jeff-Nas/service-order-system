@@ -5,11 +5,18 @@ import { inputStyles } from "./osForm";
 interface FieldTypes {
   label: string;
   name: keyof OSFormData;
-  type: string;
+  type?: string;
   isRequired?: boolean;
+  placeholder?: string;
 }
 
-export function Field({ label, name, type, isRequired = false }: FieldTypes) {
+export function Field({
+  label,
+  name,
+  type = "text",
+  isRequired = false,
+  placeholder,
+}: FieldTypes) {
   const {
     register,
     formState: { errors },
@@ -26,6 +33,7 @@ export function Field({ label, name, type, isRequired = false }: FieldTypes) {
       <input
         type={type}
         id={name}
+        placeholder={placeholder}
         //definindo o que será retornado para o required
         {...register(name, {
           required: isRequired ? "Campo obrigatório" : false,

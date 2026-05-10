@@ -1,9 +1,10 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { ClientField } from "./clientField";
 import { EquipamentField } from "./equipamentField";
+import { ServicesField } from "./servicesField";
+import { PartsField } from "./partsField";
 import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
-import { ServicesField } from "./servicesField";
 
 export const inputStyles = cva(
   "p-1 bg-gray-50 rounded outline-0 text-gray-700",
@@ -22,6 +23,7 @@ export const inputStyles = cva(
 );
 
 export default function OSForm() {
+  //Dados do form são tipados aqui
   const methods = useForm<OSFormData>();
 
   function onSubmit(data: OSFormData) {
@@ -37,6 +39,7 @@ export default function OSForm() {
           <ClientField />
           <EquipamentField />
           <ServicesField />
+          <PartsField />
         </div>
         <div className="flex w-full lg:justify-end">
           <button

@@ -17,4 +17,9 @@ export interface OSFormData {
   hours: number;
   cost: string;
   serviceDescription: string;
+  //peças
+  partNumber: string;
+  quantity: number;
+  unitValue: string;
+  partDescription: string;
 }
