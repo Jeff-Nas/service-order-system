@@ -1,11 +1,11 @@
 import TextareaAutosize from "react-textarea-autosize";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, type Path } from "react-hook-form";
 import type { OSFormData } from "../../types/formType";
 import { inputStyles } from "./osForm";
 
 interface TextareaType {
   label: string;
-  name: keyof OSFormData;
+  name: Path<OSFormData>;
   isRequired?: boolean;
 }
 
@@ -14,11 +14,8 @@ export function TextareaField({
   name,
   isRequired = false,
 }: TextareaType) {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext<OSFormData>();
-  const fieldErrors = errors[name];
+  const { register, getFieldState, formState } = useFormContext<OSFormData>();
+  const { error: fieldErrors } = getFieldState(name, formState);
 
   return (
     <div className="flex flex-col min-h-22.5">
