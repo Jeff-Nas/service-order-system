@@ -18,10 +18,8 @@ export interface OSFormData {
   cost: string;
   serviceDescription: string;
   //peças
-  parts: {
-    partNumber: string;
-    quantity: number;
-    unitValue: string;
-    partDescription: string;
-  }[];
+  partNumber: string;
+  quantity: number;
+  unitValue: string;
+  partDescription: string;
 }
