@@ -24,7 +24,19 @@ export const inputStyles = cva(
 
 export default function OSForm() {
   //Dados do form são tipados aqui
-  const methods = useForm<OSFormData>();
+  //declaramos valores padrões para renderizar o formulário em partsField que usa map.
+  const methods = useForm<OSFormData>({
+    defaultValues: {
+      parts: [
+        {
+          partNumber: "",
+          quantity: 1,
+          unitValue: "",
+          partDescription: "",
+        },
+      ],
+    },
+  });
 
   function onSubmit(data: OSFormData) {
     console.log(data);
