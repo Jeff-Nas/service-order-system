@@ -11,7 +11,7 @@ export function EquipamentField() {
   } = useFormContext<OSFormData>();
 
   return (
-    <div className="bg-white border-gray-300 rounded-lg border p-5 sm:w-2/3 mx-auto">
+    <div className="bg-white border-gray-300 rounded-lg border p-5 w-[85%] sm:w-2/3 mx-auto">
       <h2 className="text-xl lg:text-2xl font-semibold my-2">
         Dados do Equipamento
       </h2>
@@ -28,7 +28,12 @@ export function EquipamentField() {
         isRequired={false}
       />
 
-      <Field label="Horímetro" name="hourmeter" type="text" />
+      <Field
+        label="Horímetro"
+        name="hourmeter"
+        type="text"
+        placeholder="000.0"
+      />
 
       <div className="flex flex-col min-h-22.5">
         <label htmlFor="defect" className="text-gray-700 my-2">

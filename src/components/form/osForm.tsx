@@ -7,7 +7,7 @@ import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
 
 export const inputStyles = cva(
-  "p-1 bg-gray-50 rounded outline-0 text-gray-700",
+  "p-1 bg-gray-50 rounded outline-0 text-gray-700 w-full",
   {
     variants: {
       status: {
@@ -47,7 +47,7 @@ export default function OSForm() {
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
         {/*testando o justify center */}
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2  justify-center max-w-5xl mx-auto">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 justify-center w-full mx-auto">
           <ClientField />
           <EquipamentField />
           <ServicesField />
