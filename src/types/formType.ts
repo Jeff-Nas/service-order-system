@@ -24,4 +24,9 @@ export interface OSFormData {
     unitValue: string;
     partDescription: string;
   }[];
+  //imagens
+  evidences: {
+    file: File;
+    previewUrl: string;
+  };
 }
