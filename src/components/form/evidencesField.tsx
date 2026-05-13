@@ -1,121 +1,150 @@
-import React, { useRef, useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
-import { Camera, X, LoaderCircle } from "lucide-react";
-import { type OSFormData } from "@/types/formType";
-import { compressToWebP } from "@/utils/imageUtils";
+import { useState, useRef, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import { Camera, LoaderCircle, X } from "lucide-react";
+import { compressToWebP } from "../../utils/imageUtils";
+import type { OSFormData } from "../../types/formType";
 
 export function EvidencesField() {
-  // Mantemos apenas um estado global de loading
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { control } = useFormContext<OSFormData>();
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "evidences",
-  });
-
+  const {
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<OSFormData>();
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelected = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  // Observa o array de evidências atual (garante que inicie vazio caso undefined)
+  const evidences = watch("evidences") || [];
+  const maxImages = 4;
 
-    // 1. Liga o Loading ANTES de começar o loop
-    setIsLoading(true);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-    const availableSlots = 4 - fields.length;
-    const filesToProcess = Array.from(files).slice(0, availableSlots);
-
-    for (const file of filesToProcess) {
-      try {
-        const webpFile = await compressToWebP(file, 0.7);
-        const previewUrl = URL.createObjectURL(webpFile);
-
-        append({
-          file: webpFile,
-          previewUrl: previewUrl,
-        });
-      } catch (error) {
-        console.log("Erro ao processar a imagem", error);
-      }
+    if (evidences.length + files.length > maxImages) {
+      alert(`Você pode adicionar no máximo ${maxImages} fotos.`);
+      return;
     }
 
-    // 2. Desliga o Loading APENAS no final de tudo, fora do loop!
-    setIsLoading(false);
+    setIsCompressing(true);
 
-    // Limpa o input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    try {
+      const processedEvidences = await Promise.all(
+        files.map(async (file) => {
+          // Converte para WebP usando sua função utilitária
+          const webpFile = await compressToWebP(file, 0.7);
+          // Cria o link temporário para exibição
+          const previewUrl = URL.createObjectURL(webpFile);
+
+          return { file: webpFile, previewUrl };
+        }),
+      );
+
+      // Atualiza o estado do formulário combinando as imagens antigas com as novas
+      setValue("evidences", [...evidences, ...processedEvidences], {
+        shouldValidate: true,
+      });
+    } catch (error) {
+      console.error("Erro ao processar as imagens:", error);
+      alert("Ocorreu um erro ao otimizar a imagem. Tente novamente.");
+    } finally {
+      setIsCompressing(false);
+      // Limpa o input para permitir selecionar o mesmo arquivo novamente se o usuário o deletar
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
-  return (
-    <div className="bg-white border-gray-300 rounded-lg border p-5 sm:w-2/3 mx-auto mt-6">
-      <h2 className="text-xl lg:text-2xl font-semibold my-2 text-gray-800">
-        Evidências Fotográficas
-      </h2>
-      <hr className="border-gray-300 mb-6" />
+  const removeImage = (indexToRemove: number) => {
+    const imageToRemove = evidences[indexToRemove];
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Renderização das Imagens que JÁ FORAM processadas */}
-        {fields.map((field, index) => (
+    // Limpeza crucial: libera a memória do navegador que estava alocada para essa pré-visualização
+    URL.revokeObjectURL(imageToRemove.previewUrl);
+
+    const newEvidences = evidences.filter(
+      (_, index) => index !== indexToRemove,
+    );
+    setValue("evidences", newEvidences, { shouldValidate: true });
+  };
+
+  // Limpa as URLs temporárias se o componente for desmontado (ex: cancelou a OS)
+  useEffect(() => {
+    return () => {
+      evidences.forEach((ev) => URL.revokeObjectURL(ev.previewUrl));
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="flex flex-col p-4 border border-gray-200 rounded-xl bg-white shadow-sm w-full">
+      <div className="border-b border-gray-200 pb-2 mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">
+          Evidências Fotográficas
+        </h3>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {/* Renderiza as imagens já adicionadas */}
+        {evidences.map((evidence, index) => (
           <div
-            key={field.id}
-            className="relative aspect-square group rounded-xl overflow-hidden shadow-sm"
+            key={evidence.previewUrl}
+            className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200 shadow-sm"
           >
             <img
-              src={field.previewUrl}
+              src={evidence.previewUrl}
               alt={`Evidência ${index + 1}`}
               className="w-full h-full object-cover"
             />
+            {/* Botão de excluir que aparece no canto superior */}
             <button
               type="button"
-              onClick={() => remove(index)}
-              className="absolute top-2 right-2 bg-red-500/80 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors"
+              onClick={() => removeImage(index)}
+              className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-red-500 hover:text-white text-gray-700 rounded-full transition-colors backdrop-blur-sm"
+              title="Remover foto"
             >
-              <X size={16} />
+              <X size={18} strokeWidth={2.5} />
             </button>
           </div>
         ))}
 
-        {/* Botão de Adicionar / Placeholder de Loading */}
-        {fields.length < 4 && (
-          <button
-            type="button"
-            disabled={isLoading} // Desabilita o clique enquanto carrega
-            onClick={() => fileInputRef.current?.click()}
-            className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:border-gray-400 transition-colors"
+        {/* Botão de Adicionar Foto - Só renderiza se tiver menos de 4 imagens */}
+        {evidences.length < maxImages && (
+          <label
+            className={`flex flex-col items-center justify-center aspect-square rounded-xl border-2 border-dashed transition-colors cursor-pointer
+              ${errors.evidences ? "border-red-400 bg-red-50" : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"}
+              ${isCompressing ? "opacity-70 cursor-not-allowed" : ""}
+            `}
           >
-            {isLoading ? (
-              // Mostra o Spinner girando
-              <div className="flex flex-col items-center">
-                <LoaderCircle className="animate-spin w-8 h-8 mb-2 text-blue-500" />
-                <span className="text-sm font-medium text-blue-600">
-                  Otimizando...
-                </span>
-              </div>
+            {isCompressing ? (
+              <LoaderCircle
+                className="animate-spin text-blue-500 mb-2"
+                size={32}
+              />
             ) : (
-              // Mostra a Câmera normal
-              <div className="flex flex-col items-center">
-                <Camera className="w-8 h-8 mb-2 text-gray-400" />
-                <span className="text-sm font-medium">Adicionar Foto</span>
-              </div>
+              <Camera className="text-gray-400 mb-2" size={32} />
             )}
-          </button>
+            <span className="text-sm font-medium text-gray-500">
+              {isCompressing ? "Otimizando..." : "Adicionar Foto"}
+            </span>
+
+            <input
+              type="file"
+              accept="image/*"
+              multiple // Permite selecionar várias de uma vez
+              className="hidden"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              disabled={isCompressing}
+            />
+          </label>
         )}
       </div>
 
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileSelected}
-        accept="image/*"
-        capture="environment"
-        multiple
-        className="hidden"
-      />
+      {errors.evidences && (
+        <span className="text-red-500 text-sm mt-2 font-medium">
+          {errors.evidences.message as string}
+        </span>
+      )}
     </div>
   );
 }
