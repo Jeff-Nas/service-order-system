@@ -166,7 +166,8 @@ export function EvidencesField() {
 
         {/* Botão de Adicionar Foto - Só renderiza se tiver menos de 4 imagens */}
         {evidences.length < maxImages && (
-          <label
+          <button
+            type="button"
             className={`flex flex-col items-center justify-center aspect-square rounded-xl border-2 border-dashed transition-colors cursor-pointer
               ${errors.evidences ? "border-red-400 bg-red-50" : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"}
               ${isCompressing ? "opacity-70 cursor-not-allowed" : ""}
@@ -194,7 +195,7 @@ export function EvidencesField() {
               ref={fileInputRef}
               disabled={isCompressing}
             />
-          </label>
+          </button>
         )}
       </div>
 
