@@ -166,36 +166,51 @@ export function EvidencesField() {
 
         {/* Botão de Adicionar Foto - Só renderiza se tiver menos de 4 imagens */}
         {evidences.length < maxImages && (
-          <button
-            type="button"
-            className={`flex flex-col items-center justify-center aspect-square rounded-xl border-2 border-dashed transition-colors cursor-pointer
-              ${errors.evidences ? "border-red-400 bg-red-50" : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"}
-              ${isCompressing ? "opacity-70 cursor-not-allowed" : ""}
-            `}
-          >
-            {isCompressing ? (
-              <LoaderCircle
-                className="animate-spin text-blue-500 mb-2"
-                size={32}
-              />
-            ) : (
-              <Camera className="text-gray-400 mb-2" size={32} />
-            )}
-            <span className="text-sm font-medium text-gray-500">
-              {isCompressing ? "Otimizando..." : "Adicionar Foto"}
-            </span>
+          <>
+            {/*
+              FIX: era <label> com <input> interno.
+              Em mobile (especialmente Safari/WebKit), esse padrão dentro de um <form>
+              pode disparar o submit ao toque — página recarrega, form some.
+              Solução: <button type="button"> aciona o input via ref. Seguro em qualquer browser.
+            */}
+            <button
+              type="button"
+              onClick={() => !isCompressing && fileInputRef.current?.click()}
+              disabled={isCompressing}
+              className={`flex flex-col items-center justify-center aspect-square rounded-xl border-2 border-dashed transition-colors cursor-pointer
+                ${errors.evidences ? "border-red-400 bg-red-50" : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"}
+                ${isCompressing ? "opacity-70 cursor-not-allowed" : ""}
+              `}
+            >
+              {isCompressing ? (
+                <LoaderCircle
+                  className="animate-spin text-blue-500 mb-2"
+                  size={32}
+                />
+              ) : (
+                <Camera className="text-gray-400 mb-2" size={32} />
+              )}
+              <span className="text-sm font-medium text-gray-500">
+                {isCompressing ? "Otimizando..." : "Adicionar Foto"}
+              </span>
+            </button>
 
+            {/*
+              FIX: capture={captureMode || undefined}
+              capture={false} em alguns browsers mobile vira a string "false",
+              que força a câmera mesmo no modo Galeria.
+              undefined remove o atributo completamente — comportamento correto.
+            */}
             <input
               type="file"
               accept="image/*"
-              //multiple  Permite selecionar várias de uma vez - QUEBRADO: não carrega
-              capture={captureMode}
+              capture={captureMode || undefined}
               className="hidden"
               onChange={handleFileChange}
               ref={fileInputRef}
               disabled={isCompressing}
             />
-          </button>
+          </>
         )}
       </div>
 
