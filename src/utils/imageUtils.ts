@@ -2,12 +2,14 @@
 export const compressToWebP = (file: File, quality = 0.7): Promise<File> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.readAsDataURL(file); //sempre retorna uma string
+    reader.readAsDataURL(file);
 
     reader.onload = (event) => {
       const img = new Image();
-      img.src = event.target?.result as string;
 
+      // FIX: handlers ANTES de setar o src.
+      // Em mobile, o engine pode carregar a imagem antes do handler ser atribuído
+      // (race condition) — o evento dispara, ninguém ouve, a Promise fica pendurada.
       img.onload = () => {
         const canvas = document.createElement("canvas");
         canvas.width = img.width;
@@ -18,17 +20,14 @@ export const compressToWebP = (file: File, quality = 0.7): Promise<File> => {
 
         ctx.drawImage(img, 0, 0);
 
-        // Aqui acontece a mágica: converte para WebP com a qualidade escolhida
         canvas.toBlob(
           (blob) => {
-            if (!blob) return reject("Falha na conversão");
-            // Cria um novo arquivo File com a extensão correta
+            if (!blob) return reject("Falha na conversão para WebP");
+
             const webpFile = new File(
               [blob],
               file.name.replace(/\.[^/.]+$/, ".webp"),
-              {
-                type: "image/webp",
-              },
+              { type: "image/webp" },
             );
             resolve(webpFile);
           },
@@ -36,7 +35,14 @@ export const compressToWebP = (file: File, quality = 0.7): Promise<File> => {
           quality,
         );
       };
+
+      img.onerror = () =>
+        reject("Falha ao carregar a imagem no elemento <img>");
+
+      // src por último — só agora o browser começa a carregar
+      img.src = event.target?.result as string;
     };
+
     reader.onerror = (error) => reject(error);
   });
 };
