@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 import { Camera, LoaderCircle, X, Grid2X2 } from "lucide-react";
 import { compressToWebP } from "../../utils/imageUtils";
 import type { OSFormData } from "../../types/formType";
+import { motion } from "motion/react";
 
 export function EvidencesField() {
   const {
@@ -85,23 +86,54 @@ export function EvidencesField() {
       </div>
 
       {/*Ativa o modo capture do input */}
-      <div className="border mb-3 flex justify-center p-0.5">
+      <div className="relative mb-3 flex justify-center rounded-lg bg-gray-100 p-0.5 border">
         <button
           type="button"
-          className={`py-2 px-4 text-center uppercase w-full ${!captureMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-700"}`}
-          onClick={() => setCaptureMode(!captureMode)}
+          className="relative w-full py-2 px-4 uppercase"
+          onClick={() => setCaptureMode(false)}
         >
-          <div className="flex items-center justify-center gap-2">
+          {!captureMode && (
+            <motion.div
+              layoutId="toggle-pill"
+              className="absolute inset-0 rounded-md bg-gray-700"
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 35,
+              }}
+            />
+          )}
+
+          <div
+            className={`relative z-10 flex items-center justify-center gap-2
+      ${!captureMode ? "text-white" : "text-gray-700"}`}
+          >
             <Grid2X2 size={18} />
             <span className="font-semibold">Galeria</span>
           </div>
         </button>
+
         <button
           type="button"
-          className={`py-2 px-4 text-center uppercase w-full ${captureMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-700"}`}
-          onClick={() => setCaptureMode(!captureMode)}
+          className="relative w-full py-2 px-4 uppercase"
+          onClick={() => setCaptureMode(true)}
         >
-          <div className="flex items-center justify-center gap-2">
+          {captureMode && (
+            <motion.div
+              layoutId="toggle-pill"
+              className="absolute inset-0 rounded-md bg-gray-700"
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 35,
+              }}
+            />
+          )}
+
+          <div
+            className={`relative z-10 flex items-center justify-center gap-2
+      ${captureMode ? "text-white" : "text-gray-700"}`}
+          >
             <Camera size={20} className="mb-0.5" />
             <span className="font-semibold">Câmera</span>
           </div>
@@ -155,7 +187,7 @@ export function EvidencesField() {
             <input
               type="file"
               accept="image/*"
-              multiple // Permite selecionar várias de uma vez - QUEBRADO: não carrega
+              //multiple  Permite selecionar várias de uma vez - QUEBRADO: não carrega
               capture={captureMode}
               className="hidden"
               onChange={handleFileChange}
