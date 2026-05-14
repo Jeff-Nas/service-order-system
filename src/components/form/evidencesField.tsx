@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { Camera, LoaderCircle, X } from "lucide-react";
+import { Camera, LoaderCircle, X, Grid2X2 } from "lucide-react";
 import { compressToWebP } from "../../utils/imageUtils";
 import type { OSFormData } from "../../types/formType";
 
@@ -11,6 +11,7 @@ export function EvidencesField() {
     formState: { errors },
   } = useFormContext<OSFormData>();
   const [isCompressing, setIsCompressing] = useState(false);
+  const [captureMode, setCaptureMode] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Observa o array de evidências atual (garante que inicie vazio caso undefined)
@@ -76,11 +77,35 @@ export function EvidencesField() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex flex-col p-4 border border-gray-200 rounded-xl bg-white shadow-sm w-full">
+    <div className="flex flex-col p-4 border border-gray-200 rounded-xl bg-white shadow-sm w-[85%] sm:w-2/3 mx-auto">
       <div className="border-b border-gray-200 pb-2 mb-4">
         <h3 className="text-lg font-semibold text-gray-800">
           Evidências Fotográficas
         </h3>
+      </div>
+
+      {/*Ativa o modo capture do input */}
+      <div className="border mb-3 flex justify-center p-0.5">
+        <button
+          type="button"
+          className={`py-2 px-4 text-center uppercase w-full ${!captureMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-700"}`}
+          onClick={() => setCaptureMode(!captureMode)}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <Grid2X2 size={18} />
+            <span className="font-semibold">Galeria</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          className={`py-2 px-4 text-center uppercase w-full ${captureMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-700"}`}
+          onClick={() => setCaptureMode(!captureMode)}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <Camera size={20} className="mb-0.5" />
+            <span className="font-semibold">Câmera</span>
+          </div>
+        </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -88,7 +113,7 @@ export function EvidencesField() {
         {evidences.map((evidence, index) => (
           <div
             key={evidence.previewUrl}
-            className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200 shadow-sm"
+            className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200 shadow-sm "
           >
             <img
               src={evidence.previewUrl}
@@ -130,7 +155,8 @@ export function EvidencesField() {
             <input
               type="file"
               accept="image/*"
-              multiple // Permite selecionar várias de uma vez
+              multiple // Permite selecionar várias de uma vez - QUEBRADO: não carrega
+              capture={captureMode}
               className="hidden"
               onChange={handleFileChange}
               ref={fileInputRef}
