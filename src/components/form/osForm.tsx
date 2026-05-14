@@ -5,6 +5,7 @@ import { ServicesField } from "./servicesField";
 import { PartsField } from "./partsField";
 import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
+import { EvidencesField } from "./evidencesField";
 
 export const inputStyles = cva(
   "p-1 bg-gray-50 rounded outline-0 text-gray-700 w-full",
@@ -52,6 +53,8 @@ export default function OSForm() {
           <EquipamentField />
           <ServicesField />
           <PartsField />
+          <EvidencesField />
+          <input type="file" accept="image/*" />
         </div>
         <div className="flex w-full lg:justify-end">
           <button
