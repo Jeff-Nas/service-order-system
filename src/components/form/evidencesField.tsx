@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import { Camera, LoaderCircle, X, Grid2X2 } from "lucide-react";
-import { compressToWebP } from "../../utils/imageUtils";
+import { Camera, X, Grid2X2 } from "lucide-react";
+import { createPreviewUrl } from "../../utils/imageUtils";
 import type { OSFormData } from "../../types/formType";
 import { motion } from "motion/react";
+import { useState } from "react";
 
 export function EvidencesField() {
   const {
@@ -11,15 +12,14 @@ export function EvidencesField() {
     setValue,
     formState: { errors },
   } = useFormContext<OSFormData>();
-  const [isCompressing, setIsCompressing] = useState(false);
+
   const [captureMode, setCaptureMode] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Observa o array de evidências atual (garante que inicie vazio caso undefined)
   const evidences = watch("evidences") || [];
   const maxImages = 4;
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
@@ -28,49 +28,32 @@ export function EvidencesField() {
       return;
     }
 
-    setIsCompressing(true);
+    // createObjectURL é síncrono e instantâneo — zero processamento, zero risco de crash.
+    // O File original é salvo no Dexie diretamente (Dexie suporta Blob/File nativamente).
+    // Compressão para WebP será feita no backend quando o formulário for enviado.
+    const newEvidences = files.map((file) => ({
+      file,
+      previewUrl: createPreviewUrl(file),
+      size: file.size,
+    }));
 
-    try {
-      const processedEvidences = await Promise.all(
-        files.map(async (file) => {
-          // Converte para WebP usando sua função utilitária
-          const webpFile = await compressToWebP(file, 0.7);
-          // Cria o link temporário para exibição
-          const previewUrl = URL.createObjectURL(webpFile);
+    setValue("evidences", [...evidences, ...newEvidences], {
+      shouldValidate: true,
+    });
 
-          return { file: webpFile, previewUrl };
-        }),
-      );
-
-      // Atualiza o estado do formulário combinando as imagens antigas com as novas
-      setValue("evidences", [...evidences, ...processedEvidences], {
-        shouldValidate: true,
-      });
-    } catch (error) {
-      console.error("Erro ao processar as imagens:", error);
-      alert("Ocorreu um erro ao otimizar a imagem. Tente novamente.");
-    } finally {
-      setIsCompressing(false);
-      // Limpa o input para permitir selecionar o mesmo arquivo novamente se o usuário o deletar
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const removeImage = (indexToRemove: number) => {
-    const imageToRemove = evidences[indexToRemove];
-
-    // Limpeza crucial: libera a memória do navegador que estava alocada para essa pré-visualização
-    URL.revokeObjectURL(imageToRemove.previewUrl);
-
-    const newEvidences = evidences.filter(
-      (_, index) => index !== indexToRemove,
+    URL.revokeObjectURL(evidences[indexToRemove].previewUrl);
+    setValue(
+      "evidences",
+      evidences.filter((_, index) => index !== indexToRemove),
+      { shouldValidate: true },
     );
-    setValue("evidences", newEvidences, { shouldValidate: true });
   };
 
-  // Limpa as URLs temporárias se o componente for desmontado (ex: cancelou a OS)
+  // Revoga todas as Object URLs ao desmontar o componente
   useEffect(() => {
     return () => {
       evidences.forEach((ev) => URL.revokeObjectURL(ev.previewUrl));
@@ -85,7 +68,7 @@ export function EvidencesField() {
         </h3>
       </div>
 
-      {/*Ativa o modo capture do input */}
+      {/* Toggle Galeria / Câmera */}
       <div className="relative mb-3 flex justify-center rounded-lg bg-gray-100 p-0.5 border">
         <button
           type="button"
@@ -96,17 +79,12 @@ export function EvidencesField() {
             <motion.div
               layoutId="toggle-pill"
               className="absolute inset-0 rounded-md bg-gray-700"
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 35,
-              }}
+              transition={{ type: "spring", stiffness: 500, damping: 35 }}
             />
           )}
-
           <div
             className={`relative z-10 flex items-center justify-center gap-2
-      ${!captureMode ? "text-white" : "text-gray-700"}`}
+              ${!captureMode ? "text-white" : "text-gray-700"}`}
           >
             <Grid2X2 size={18} />
             <span className="font-semibold">Galeria</span>
@@ -122,17 +100,12 @@ export function EvidencesField() {
             <motion.div
               layoutId="toggle-pill"
               className="absolute inset-0 rounded-md bg-gray-700"
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 35,
-              }}
+              transition={{ type: "spring", stiffness: 500, damping: 35 }}
             />
           )}
-
           <div
             className={`relative z-10 flex items-center justify-center gap-2
-      ${captureMode ? "text-white" : "text-gray-700"}`}
+              ${captureMode ? "text-white" : "text-gray-700"}`}
           >
             <Camera size={20} className="mb-0.5" />
             <span className="font-semibold">Câmera</span>
@@ -141,18 +114,16 @@ export function EvidencesField() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {/* Renderiza as imagens já adicionadas */}
         {evidences.map((evidence, index) => (
           <div
             key={evidence.previewUrl}
-            className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200 shadow-sm "
+            className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm"
           >
             <img
               src={evidence.previewUrl}
               alt={`Evidência ${index + 1}`}
               className="w-full h-full object-cover"
             />
-            {/* Botão de excluir que aparece no canto superior */}
             <button
               type="button"
               onClick={() => removeImage(index)}
@@ -164,43 +135,25 @@ export function EvidencesField() {
           </div>
         ))}
 
-        {/* Botão de Adicionar Foto - Só renderiza se tiver menos de 4 imagens */}
         {evidences.length < maxImages && (
           <>
-            {/*
-              FIX: era <label> com <input> interno.
-              Em mobile (especialmente Safari/WebKit), esse padrão dentro de um <form>
-              pode disparar o submit ao toque — página recarrega, form some.
-              Solução: <button type="button"> aciona o input via ref. Seguro em qualquer browser.
-            */}
             <button
               type="button"
-              onClick={() => !isCompressing && fileInputRef.current?.click()}
-              disabled={isCompressing}
+              onClick={() => fileInputRef.current?.click()}
               className={`flex flex-col items-center justify-center aspect-square rounded-xl border-2 border-dashed transition-colors cursor-pointer
-                ${errors.evidences ? "border-red-400 bg-red-50" : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"}
-                ${isCompressing ? "opacity-70 cursor-not-allowed" : ""}
+                ${
+                  errors.evidences
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"
+                }
               `}
             >
-              {isCompressing ? (
-                <LoaderCircle
-                  className="animate-spin text-blue-500 mb-2"
-                  size={32}
-                />
-              ) : (
-                <Camera className="text-gray-400 mb-2" size={32} />
-              )}
+              <Camera className="text-gray-400 mb-2" size={32} />
               <span className="text-sm font-medium text-gray-500">
-                {isCompressing ? "Otimizando..." : "Adicionar Foto"}
+                Adicionar Foto
               </span>
             </button>
 
-            {/*
-              FIX: capture={captureMode || undefined}
-              capture={false} em alguns browsers mobile vira a string "false",
-              que força a câmera mesmo no modo Galeria.
-              undefined remove o atributo completamente — comportamento correto.
-            */}
             <input
               type="file"
               accept="image/*"
@@ -208,7 +161,6 @@ export function EvidencesField() {
               className="hidden"
               onChange={handleFileChange}
               ref={fileInputRef}
-              disabled={isCompressing}
             />
           </>
         )}

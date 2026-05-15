@@ -28,5 +28,6 @@ export interface OSFormData {
   evidences: {
     file: File;
     previewUrl: string;
+    size: number;
   }[];
 }
