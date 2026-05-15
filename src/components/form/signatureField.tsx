@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import { useRef, useEffect } from "react";
+import SignaturePad from "signature_pad";
 import { Eraser } from "lucide-react";
 
 interface SignatureFieldProps {
@@ -15,41 +15,63 @@ export function SignatureField({
   error,
   onChange,
 }: SignatureFieldProps) {
-  const sigPad = useRef<SignatureCanvas>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const padRef = useRef<SignaturePad | null>(null);
 
-  const handleClear = () => {
-    if (sigPad.current) {
-      sigPad.current.clear();
-      onChange(null);
-    }
-  };
+  useEffect(() => {
+    if (!canvasRef.current) return;
 
-  const handleEnd = () => {
-    if (!sigPad.current) return;
+    const canvas = canvasRef.current;
 
-    // Workaround de timing: aguarda um tick antes de checar
-    // Em mobile, isEmpty() pode retornar true se chamado imediatamente no onEnd
-    setTimeout(() => {
-      if (!sigPad.current || sigPad.current.isEmpty()) return;
+    const resizeCanvas = () => {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
 
-      const canvas = sigPad.current.getTrimmedCanvas();
+      // Salva o desenho atual antes de redimensionar
+      const data = padRef.current?.toData();
+
+      // Sincroniza os atributos internos com o tamanho CSS real
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+
+      const ctx = canvas.getContext("2d");
+      ctx?.scale(ratio, ratio);
+
+      // Restaura o desenho após redimensionar
+      if (data) padRef.current?.fromData(data);
+    };
+
+    padRef.current = new SignaturePad(canvas, { penColor: "#1f2937" });
+
+    // Redimensiona imediatamente e observa mudanças futuras
+    resizeCanvas();
+    const observer = new ResizeObserver(resizeCanvas);
+    observer.observe(canvas);
+
+    padRef.current.addEventListener("endStroke", () => {
+      if (!padRef.current || padRef.current.isEmpty()) return;
+
       const dataURL = canvas.toDataURL("image/png");
-
       const arr = dataURL.split(",");
       const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
       const bstr = atob(arr[1]);
       let n = bstr.length;
       const u8arr = new Uint8Array(n);
-
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
 
       const fileName = `assinatura_${label.toLowerCase().replace(/\s+/g, "_")}.png`;
-      const file = new File([u8arr], fileName, { type: mime });
+      onChange(new File([u8arr], fileName, { type: mime }));
+    });
 
-      onChange(file);
-    }, 0);
+    return () => {
+      observer.disconnect();
+      padRef.current?.off();
+    };
+  }, [label, onChange]);
+
+  const handleClear = () => {
+    padRef.current?.clear();
+    onChange(null);
   };
 
   return (
@@ -75,15 +97,9 @@ export function SignatureField({
             : "border-gray-300 hover:border-gray-400"
         }`}
       >
-        <SignatureCanvas
-          ref={sigPad}
-          onEnd={handleEnd}
-          clearOnResize={false}
-          penColor="#1f2937"
-          canvasProps={{
-            className: "w-full h-full cursor-crosshair",
-            style: { touchAction: "none" },
-          }}
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full cursor-crosshair touch-none"
         />
       </div>
 
