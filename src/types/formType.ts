@@ -30,4 +30,7 @@ export interface OSFormData {
     previewUrl: string;
     size: number;
   }[];
+  //assinaturas
+  technicianSignature: File | null;
+  clientSignature: File | null;
 }

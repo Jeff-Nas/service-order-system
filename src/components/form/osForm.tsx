@@ -1,4 +1,4 @@
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import { ClientField } from "./clientField";
 import { EquipamentField } from "./equipamentField";
 import { ServicesField } from "./servicesField";
@@ -6,6 +6,7 @@ import { PartsField } from "./partsField";
 import type { OSFormData } from "../../types/formType";
 import { cva } from "class-variance-authority";
 import { EvidencesField } from "./evidencesField";
+import { SignatureField } from "./signatureField";
 
 export const inputStyles = cva(
   "p-1 bg-gray-50 rounded outline-0 text-gray-700 w-full",
@@ -24,8 +25,6 @@ export const inputStyles = cva(
 );
 
 export default function OSForm() {
-  //Dados do form são tipados aqui
-  //declaramos valores padrões para renderizar o formulário em partsField que usa map.
   const methods = useForm<OSFormData>({
     defaultValues: {
       parts: [
@@ -36,25 +35,71 @@ export default function OSForm() {
           partDescription: "",
         },
       ],
+      technicianSignature: null,
+      clientSignature: null,
     },
   });
+
+  // Observa o nome do cliente para repassar à prop 'personName' da assinatura
+  const clientName = methods.watch("clientName");
 
   function onSubmit(data: OSFormData) {
     console.log(data);
   }
 
   return (
-    //O primeiro render roda handleSubmit que retorna outra função - pronta para p submit
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        {/*testando o justify center */}
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 justify-center w-full mx-auto">
+        <div className="flex flex-col gap-6 xl:grid xl:grid-cols-2 justify-center w-full mx-auto">
           <ClientField />
           <EquipamentField />
           <ServicesField />
           <PartsField />
           <EvidencesField />
-          <input type="file" accept="image/*" />
+
+          <div className="flex flex-col gap-3">
+            {/* Assinatura do Técnico */}
+            <div className="w-full flex justify-center bg-white p-4 border border-gray-200 rounded-xl shadow-sm">
+              <Controller
+                name="technicianSignature"
+                control={methods.control}
+                rules={{
+                  validate: (value) =>
+                    value instanceof File ||
+                    "A assinatura do técnico é obrigatória",
+                }}
+                render={({ field, fieldState }) => (
+                  <SignatureField
+                    label="Assinatura do Técnico"
+                    personName="Técnico Responsável"
+                    onChange={field.onChange}
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </div>
+
+            {/* Assinatura do Cliente */}
+            <div className="w-full flex justify-center bg-white p-4 border border-gray-200 rounded-xl shadow-sm">
+              <Controller
+                name="clientSignature"
+                control={methods.control}
+                rules={{
+                  validate: (value) =>
+                    value instanceof File ||
+                    "A assinatura do cliente é obrigatória",
+                }}
+                render={({ field, fieldState }) => (
+                  <SignatureField
+                    label="Assinatura do Cliente"
+                    personName={clientName} // O nome digitado no formulário aparecerá aqui
+                    onChange={field.onChange}
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </div>
+          </div>
         </div>
         <div className="flex w-full lg:justify-end">
           <button
